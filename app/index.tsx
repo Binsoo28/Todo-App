@@ -1,6 +1,6 @@
+import { styles } from '@/style/styles';
 import { useState } from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { styles } from '../style/styles';
 
 interface Todo {
   id: number;
@@ -18,10 +18,10 @@ export default function App() {
     const newTodo: Todo = {
       id: Date.now(),
       name: todo,
-      time: new Date().toLocaleString(), // ngày + giờ đầy đủ
+      time: new Date().toLocaleString(),
       completed: false,
     };
-    setListTodo([newTodo, ...listTodo]); // thêm lên đầu danh sách
+    setListTodo([newTodo, ...listTodo]);
     setTodo('');
   };
 
@@ -33,29 +33,50 @@ export default function App() {
     setListTodo(listTodo.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
   };
 
+  const toggleAllCompleted = () => {
+    const hasUncompleted = listTodo.some((t) => !t.completed);
+    setListTodo(listTodo.map((t) => ({ ...t, completed: hasUncompleted })));
+  };
+
+  const clearAll = () => setListTodo([]);
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <Text style={styles.header}>Todo App</Text>
 
       {/* Form */}
-      <View>
+      <View style={{ marginVertical: 10 }}>
         <TextInput
           style={styles.input}
           placeholder="Enter todo..."
           value={todo}
-          onChangeText={(value) => setTodo(value)}
+          onChangeText={setTodo}
         />
         <TouchableOpacity
           style={[styles.button, { backgroundColor: todo ? '#1d62b7' : '#ccc' }]}
           onPress={handleAddTodo}
           disabled={!todo}>
-          <Text style={{ color: 'white', fontSize: 18, textAlign: 'center' }}>Add Todo</Text>
+          <Text style={styles.buttonText}>Add Todo</Text>
         </TouchableOpacity>
       </View>
 
+      {/* Action Buttons */}
+      {listTodo.length > 0 && (
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 10 }}>
+          <TouchableOpacity style={styles.smallButton} onPress={toggleAllCompleted}>
+            <Text style={styles.buttonText}>Toggle All</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.smallButton, { backgroundColor: '#ff4d4d' }]}
+            onPress={clearAll}>
+            <Text style={styles.buttonText}>Clear All</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* List */}
-      <ScrollView style={{ marginTop: 20, maxHeight: '60%' }}>
+      <ScrollView style={{ marginTop: 10, maxHeight: '60%' }}>
         {listTodo.length === 0 ? (
           <Text style={{ textAlign: 'center', color: '#555' }}>No todos yet</Text>
         ) : (
@@ -66,12 +87,16 @@ export default function App() {
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                padding: 10,
+                padding: 15,
                 marginBottom: 10,
-                backgroundColor: '#f2f2f2',
-                borderRadius: 5,
+                backgroundColor: item.completed ? '#d9fdd3' : '#f2f2f2',
+                borderRadius: 10,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 5,
               }}>
-              <TouchableOpacity onPress={() => toggleCompleteTodo(item.id)}>
+              <TouchableOpacity onPress={() => toggleCompleteTodo(item.id)} style={{ flex: 1 }}>
                 <Text
                   style={{
                     fontSize: 18,
@@ -84,7 +109,7 @@ export default function App() {
               </TouchableOpacity>
 
               <TouchableOpacity onPress={() => handleDeleteTodo(item.id)}>
-                <Text style={{ color: 'red', fontWeight: 'bold' }}>Delete</Text>
+                <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 16 }}>Delete</Text>
               </TouchableOpacity>
             </View>
           ))
